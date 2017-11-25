@@ -4,6 +4,7 @@
 #include "PID.h"
 #include <math.h>
 
+#define TURNING 0
 // for convenience
 using json = nlohmann::json;
 
@@ -27,7 +28,9 @@ std::string hasData(std::string s) {
   }
   return "";
 }
-double p[3] = {0.1,0.0000205,0.535};
+
+#ifdef TURNING
+double p[3] = {0.1,0.00205,0.535};
 double dp[3] = {0.02,0.0001,0.01};
 double best_err = 100.0;
 double err = 0;
@@ -44,7 +47,7 @@ void twiddle(double err)
     if(err<best_err){
         best_err = err;
         dp[ind]*=1.1;
-        //ind = (ind+1)%3;
+        ind = (ind+1)%3;
         p[ind]+=dp[ind];
         up = true;
     }
@@ -56,13 +59,14 @@ void twiddle(double err)
        else{
            p[ind]+=dp[ind];
            dp[ind]*=0.9;
-           //ind = (ind+1)%3;
+           ind = (ind+1)%3;
            p[ind]+=dp[ind];
            up = true;
        }
     }
 return ;
 }
+#endif
 
 int main()
 {
@@ -71,14 +75,20 @@ int main()
   PID pid;
   // TODO: Initialize the pid variable.
 
+#ifndef TURNING
+    double p[3] = {0.1,0.00205,0.535};
+    pid.Init(p[0], p[1], p[2]);
+#endif
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
 
+#ifdef TURNING
     if (step == 0) {
         pid.Init(p[0], p[1], p[2]);
     }
+#endif
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
       auto s = hasData(std::string(data).substr(0, length));
@@ -97,7 +107,7 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-          
+#ifdef TURNING          
           if(step>start&&step<end)
               err += pow(cte,2);
           if(step == end)
@@ -110,7 +120,7 @@ int main()
               twiddle(err);
           }
           step++;
-          //std::cout<<" step is "<<step<<std::endl;
+#endif 
           pid.UpdateError(cte);
           steer_value = -pid.TotalError();
           if(steer_value>1)
@@ -128,11 +138,15 @@ int main()
         }
       } else {
         // Manual driving
+#ifdef TURNING
         step = 0; 
         err = 0;
+        std::string reset_msg = "42[\"reset\",{}]";
+        ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT); 
+#else
         std::string reset_msg = "42[\"manul\",{}]";
         ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT); 
-          
+#endif 
       }
     }
   });
