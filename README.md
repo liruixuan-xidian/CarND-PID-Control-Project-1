@@ -2,17 +2,18 @@
 Self-Driving Car Engineer Nanodegree Program
 
 ---
-#Reflection
+# Reflection
 ## parameter effect
+
 * P parameter represent the proportional gain, this parameter decide the amplitude of adjustment according to cte, that means if the P is too big, when the vehicle angle prodece error, the vehicle will change the angle more close to the right value, but if the vehicle speed is high, the vehicle will swing enen on the straight line, but if the value is too small, the vehicle will spend much time to reach the right value, so the vehicle will overshoot the road in the sharp turn. 
 
-*I parameter represent integrates, if the parameter is too big, it will amplifier the car's amplitude. if too small, the vehicle will overshoot on the trun sharp. 
+* I parameter represent integrates, if the parameter is too big, it will amplifier the car's amplitude. if too small, the vehicle will overshoot on the trun sharp. 
 
-*D parameter represent derivative, this parameter represent the angle truns too much, so the parameter will provent the swing on the straight road, but if the D parameter is too small, the vehicel can't turn on sharp trun in time.  
+* D parameter represent derivative, this parameter represent the angle truns too much, so the parameter will provent the swing on the straight road, but if the D parameter is too small, the vehicel can't turn on sharp trun in time.  
 
-#How I turn the parameters
+# How I turn the parameters
 
-*At first, I manully trun the parameters untile the vehicle could reach the bridge, then I use twiddle to update the parameters untile the vehicle could successfully drive a lap around the track. 
+* At first, I manully trun the parameters untile the vehicle could reach the bridge, then I use twiddle to update the parameters untile the vehicle could successfully drive a lap around the track. 
 
 ## Dependencies
 
