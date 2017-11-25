@@ -27,6 +27,42 @@ std::string hasData(std::string s) {
   }
   return "";
 }
+double p[3] = {0.1,0.0000205,0.535};
+double dp[3] = {0.02,0.0001,0.01};
+double best_err = 100.0;
+double err = 0;
+bool up;
+int step = 0;
+int ind = 1;
+int start = 300;
+int end = 1500;
+
+void twiddle(double err)
+{
+    std::cout<<"best_err "<<best_err<<std::endl;
+    std::cout<<"err "<<err<<std::endl;
+    if(err<best_err){
+        best_err = err;
+        dp[ind]*=1.1;
+        //ind = (ind+1)%3;
+        p[ind]+=dp[ind];
+        up = true;
+    }
+    else{
+       if(up){
+           p[ind]-=2*dp[ind];
+           up = false;
+       }
+       else{
+           p[ind]+=dp[ind];
+           dp[ind]*=0.9;
+           //ind = (ind+1)%3;
+           p[ind]+=dp[ind];
+           up = true;
+       }
+    }
+return ;
+}
 
 int main()
 {
@@ -39,6 +75,10 @@ int main()
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
+
+    if (step == 0) {
+        pid.Init(p[0], p[1], p[2]);
+    }
     if (length && length > 2 && data[0] == '4' && data[1] == '2')
     {
       auto s = hasData(std::string(data).substr(0, length));
@@ -58,20 +98,41 @@ int main()
           * another PID controller to control the speed!
           */
           
+          if(step>start&&step<end)
+              err += pow(cte,2);
+          if(step == end)
+          {
+              err = err/(end-start);
+              std::cout<<"new p "<<p[0]<<" "<<p[1]<<" "<<p[2]<<std::endl;
+              std::cout<<"new error "<<err<<std::endl;
+              std::cout<<"new dp : "<<dp[0]<<" "<<dp[1]<<" "<<dp[2]<<std::endl;
+              std::cout<<up<<std::endl;
+              twiddle(err);
+          }
+          step++;
+          //std::cout<<" step is "<<step<<std::endl;
+          pid.UpdateError(cte);
+          steer_value = -pid.TotalError();
+          if(steer_value>1)
+              steer_value = 1;
+          else if(steer_value<-1)
+              steer_value = -1;
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
-
           json msgJson;
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          std::cout << msg << std::endl;
+          //std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {
         // Manual driving
-        std::string msg = "42[\"manual\",{}]";
-        ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
+        step = 0; 
+        err = 0;
+        std::string reset_msg = "42[\"manul\",{}]";
+        ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT); 
+          
       }
     }
   });
