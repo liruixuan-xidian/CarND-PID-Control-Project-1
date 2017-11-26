@@ -73,7 +73,6 @@ int main()
   uWS::Hub h;
 
   PID pid;
-  // TODO: Initialize the pid variable.
 
 #ifndef TURNING
     double p[3] = {0.1,0.00205,0.535};
