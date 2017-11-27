@@ -4,7 +4,7 @@
 #include "PID.h"
 #include <math.h>
 
-#define TURNING 0
+//#define TURNING 0
 // for convenience
 using json = nlohmann::json;
 
@@ -30,7 +30,7 @@ std::string hasData(std::string s) {
 }
 
 #ifdef TURNING
-double p[3] = {0.1,0.00205,0.535};
+double p[3] = {1,0.00205,10.35};
 double dp[3] = {0.02,0.0001,0.01};
 double best_err = 100.0;
 double err = 0;
@@ -75,7 +75,7 @@ int main()
   PID pid;
 
 #ifndef TURNING
-    double p[3] = {0.1,0.00205,0.535};
+    double p[3] = {1,0.00205,10.538};
     pid.Init(p[0], p[1], p[2]);
 #endif
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -121,7 +121,7 @@ int main()
           step++;
 #endif 
           pid.UpdateError(cte);
-          steer_value = -pid.TotalError();
+          steer_value =pid.TotalError();
           if(steer_value>1)
               steer_value = 1;
           else if(steer_value<-1)
@@ -140,12 +140,11 @@ int main()
 #ifdef TURNING
         step = 0; 
         err = 0;
-        std::string reset_msg = "42[\"reset\",{}]";
-        ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT); 
-#else
+#endif
+        //std::string reset_msg = "42[\"manul\",{}]";
+        //ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT); 
         std::string reset_msg = "42[\"manul\",{}]";
         ws.send(reset_msg.data(), reset_msg.length(), uWS::OpCode::TEXT); 
-#endif 
       }
     }
   });
