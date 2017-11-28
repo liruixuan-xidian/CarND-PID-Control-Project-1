@@ -30,7 +30,7 @@ std::string hasData(std::string s) {
 }
 
 #ifdef TURNING
-double p[3] = {1,0.00205,10.35};
+double p[3] = {1,0.00205,20.35};
 double dp[3] = {0.02,0.0001,0.01};
 double best_err = 100.0;
 double err = 0;
@@ -75,7 +75,7 @@ int main()
   PID pid;
 
 #ifndef TURNING
-    double p[3] = {1,0.00205,10.538};
+    double p[3] = {1.0, 0.00205, 20.538};
     pid.Init(p[0], p[1], p[2]);
 #endif
   h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
@@ -132,7 +132,7 @@ int main()
           msgJson["steering_angle"] = steer_value;
           msgJson["throttle"] = 0.3;
           auto msg = "42[\"steer\"," + msgJson.dump() + "]";
-          //std::cout << msg << std::endl;
+          std::cout << msg << std::endl;
           ws.send(msg.data(), msg.length(), uWS::OpCode::TEXT);
         }
       } else {
